@@ -4,16 +4,73 @@ History
 
 X.Y.Z (YYYY-MM-DD)
 ------------------
+* Introduce pytest != 9.1.0 version restriction (:pr:`375`)
+
+0.2.32 (2026-05-18)
+------------------
+* Fix ``is_katdal_url`` which was returning False for url's containing a subtable (:pr:`372`)
+
+0.2.31 (2026-05-11)
+-------------------
+* Fix writes for arrays from array API compatible libraries (JAX, CuPy,
+  PyTorch, etc.) using ``is_array_api_obj()`` for detection and
+  ``to_device_cpu()`` for safe GPU-to-CPU transfer before casacore
+  ``putcol`` calls, via a vendored subset of ``array-api-compat`` (:pr:`370`)
+* Add mock-based unit tests for ``is_array_api_obj`` and ``to_device_cpu``
+  using fake CuPy/PyTorch stubs injected into ``sys.modules``; GPU mock
+  arrays raise on ``__array__`` unless the CPU transfer path is exercised
+  (:pr:`370`)
+* Document writing JAX, CuPy, and PyTorch arrays with dask-ms, including
+  the ``da.from_delayed`` pattern required for PyTorch due to
+  non-NumPy-compatible dtype objects (:pr:`370`)
+
+0.2.30 (2026-04-20)
+-------------------
+* Support dask >= 2024.11.0 (TaskSpec refactor): replace removed ``_execute_task``
+  with a ``convert_legacy_graph`` + ``Task.substitute`` based inlining strategy in
+  ``optimisation.py``, handling mixed graphs where dask-ms tuple tasks and new-style
+  Task objects coexist (:pr:`368`)
+* Remove ``dask < 2024.11.0`` upper-bound pin from ``pyproject.toml`` (:pr:`368`)
+
+0.2.29 (2026-01-19)
+-------------------
+* Increase support and consistency for column grouping in ``xds_from_katdal`` (:pr:`367`)
+
+0.2.28 (2026-01-13)
+-------------------
+* Remove ``DATA_DESC_ID``, ``FIELD_ID`` and ``SCAN_NUMBER`` arrays that
+  were shadowing xarray dataset attributes (:pr:`366`)
+* Add ``WEIGHT`` and ``SIGMA`` columns to katdal xarray datasets (:pr:`366`)
+* Convert many of the subtables to lists of xarray datasets (:pr:`366`)
+
+0.2.27 (2025-11-26)
+-------------------
+* Propagate ``xds_from_katdal`` kwargs to ``katdal.open`` (:pr:`364`)
+* Fix further changes of args to kwargs by the minio api (:pr:`363`)
+
+0.2.26 (2025-10-10)
+-------------------
+* Use trusted publishing (:pr:`359`)
+* Convert pyproject.toml from a poetry build to a PEP 621 structure (:pr:`359`)
+* Pass ``MinioAdmin.__init__`` arguments by kwarg (:pr:`358`)
+
+0.2.25 (2025-09-09)
+-------------------
+* Support katdal data sources in xds_from_storage_ms (:pr:`353`, :pr:`355`, :pr:`356`)
+
+0.2.24 (2025-07-02)
+-------------------
+* Support Python 3.13 (:pr:`348`, :pr:`349`)
 * Implement a cacheout-based multiton, implementing a TTL (:pr:`344`)
 
 0.2.23 (2024-11-11)
-------------------
-* Restrict dask < 2024.11.0 (:pr:`341`)
+-------------------
+* Restrict dask \< 2024.11.0 (:pr:`341`)
 * Use github action to install poetry (:pr:`340`)
 * Update readthedocs version (:pr:`339`)
 
 0.2.22 (2024-11-07)
-------------------
+-------------------
 * Pin minimum version of katdal to 0.23 (:pr:`337`)
 * Pin minimum version of python-casacore to 3.6.1 (:pr:`337`)
 * Pin minimum version of NumPy to 2.0.0 (:pr:`337`)
@@ -23,7 +80,7 @@ X.Y.Z (YYYY-MM-DD)
 * Fix date typo in HISTORY.rst (:pr:`336`)
 
 0.2.21 (2024-06-18)
-------------------
+-------------------
 * Restrict NumPy to < 2.0.0 (:pr:`333`)
 * Bump donfig dependency to 0.8.0 due to install error with pip (:pr:`332`)
 * Fix katdal import typos (:pr:`331`)
@@ -46,7 +103,7 @@ X.Y.Z (YYYY-MM-DD)
 * Address warnings (:pr:`309`)
 
 0.2.20 (2024-01-30)
-------------------
+-------------------
 * Update calver dependencies to use inequality, rather than caret dependency specifiers (:pr:`307`)
 * Update pre-commit to actions/python@v5.0.0 (:pr:`308`)
 * Update readthedocs python version to 3.9 and poetry to 1.7.1 (:pr:`303`)
@@ -63,7 +120,7 @@ X.Y.Z (YYYY-MM-DD)
 * Temporarily add Pandas as an arrow extra dependency (:pr:`296`)
 
 0.2.18 (2023-09-20)
-------------------
+-------------------
 * Ignore non-existent columns (:pr:`290`)
 * Add experimental fragments functionality (:pr:`282`, :pr:`291`)
 * Add rechunk by size utility funtion (:pr:`284`)
@@ -72,11 +129,11 @@ X.Y.Z (YYYY-MM-DD)
 * Retain ROWID coordinates during MS conversion (:pr:`286`)
 
 0.2.17 (2023-08-02)
-------------------
+-------------------
 * Change setmaxcachesize to require a read lock, not a write lock (:pr:`281`)
 
 0.2.16 (2023-05-26)
-------------------
+-------------------
 * Update calver versioned software such as dask and xarray to 2023 variants (:pr:`279`)
 * Remove unused requirements_dev.txt (:pr:`275`)
 * Support optional CASA columns  (:pr:`270`)

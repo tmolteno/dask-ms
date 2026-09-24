@@ -1,22 +1,24 @@
 # -*- coding: utf-8 -*-
 
-import pickle
 import gc
+import pickle
 
 import dask.array as da
-from dask.core import flatten
 import numpy as np
-from numpy.testing import assert_array_almost_equal, assert_array_equal
 import pytest
+from dask.core import flatten
+from numpy.testing import assert_array_almost_equal, assert_array_equal
 
 from daskms import xds_from_ms
 from daskms.optimisation import (
-    inlined_array,
-    cached_array,
+    _DASK_HAS_LEGACY_TASKS,
     ArrayCache,
     Key,
-    _key_cache,
     _array_cache_cache,
+    _CachedCompute,
+    _key_cache,
+    cached_array,
+    inlined_array,
 )
 
 
@@ -124,7 +126,12 @@ def test_cached_data_token(token):
 
     dsk = dict(carray.__dask_graph__())
     k, v = dsk.popitem()
-    cache = v[1]
+    # Old dask: v = (cache_entry, cache, Key(k), ...)  → v[1] is cache
+    # New dask: v = (_CachedCompute(cache, k, task),)  → v[0]._cache is cache
+    if _DASK_HAS_LEGACY_TASKS:
+        cache = v[1]
+    else:
+        cache = v[0]._cache
 
     if token is None:
         assert cache.token is not None

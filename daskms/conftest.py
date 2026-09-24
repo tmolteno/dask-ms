@@ -321,8 +321,8 @@ def minio_admin(minio_server, minio_user_key):
     minio = pytest.importorskip("minio")
     credentials = pytest.importorskip("minio.credentials")
     minio_admin = minio.MinioAdmin(
-        urlparse(MINIO_URL).netloc,
-        credentials.StaticProvider(MINIO_ADMIN, MINIO_PASSWORD),
+        endpoint=urlparse(MINIO_URL).netloc,
+        credentials=credentials.StaticProvider(MINIO_ADMIN, MINIO_PASSWORD),
         secure=False,
     )
     # Add a user and give it readwrite access
@@ -337,7 +337,7 @@ def py_minio_client(minio_admin, minio_user_key):
     minio = pytest.importorskip("minio")
     parsed_url = urlparse(MINIO_URL)
     yield minio.Minio(
-        parsed_url.netloc,
+        endpoint=parsed_url.netloc,
         access_key=minio_user_key,
         secret_key=minio_user_key,
         secure=False,

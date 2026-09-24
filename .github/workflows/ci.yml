@@ -2,12 +2,15 @@ name: Ubuntu CI
 
 on:
   push:
+    branches:
+    - master
+    tags:
+    - "*"
   pull_request:
   schedule:
     - cron: '30 2 * * 1,4' # Every Monday and Thursday @ 2h30am UTC
 
 env:
-  POETRY_VERSION: 1.8.3
   MINIO_SERVER_DOWNLOAD_URL: https://dl.min.io/server/minio/release/linux-amd64/archive/minio_20241029160148.0.0_amd64.deb
 
 jobs:
@@ -29,7 +32,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        python-version: ["3.10", "3.11", "3.12"]
+        python-version: ["3.10", "3.11", "3.12", "3.13"]
 
     steps:
       - name: Create Cache Hash
@@ -41,18 +44,13 @@ jobs:
           echo "INSTALL_CACHE_HASH=$HASH" >> $GITHUB_ENV
 
       - name: Set up Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v7
         with:
           python-version: ${{ matrix.python-version }}
 
-      - name: Install poetry
-        uses: abatilo/actions-poetry@v4
-        with:
-          poetry-version: ${{ env.POETRY_VERSION }}
-
       - name: Cache Installations
         id: cache-installs
-        uses: actions/cache@v4
+        uses: actions/cache@v6
         with:
           path: ~/.local
           key: install-${{ env.INSTALL_CACHE_HASH }}-2
@@ -71,24 +69,21 @@ jobs:
         run: minio --help
 
       - name: Checkout source
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
         with:
           fetch-depth: 1
 
-      - name: Setup a virtual environment appropriate to the python version
-        run: poetry env use python${{ matrix.python-version }}
-
       - name: Install dask-ms base
-        run: poetry install --extras "testing arrow zarr"
+        run: pip install .[arrow,testing,zarr]
 
       - name: Test dask-ms base
-        run: poetry run py.test -s -vvv daskms/
+        run: py.test -s -vvv daskms/
 
       - name: Install dask-ms complete
-        run: poetry install --extras "testing complete"
+        run: pip install .[complete,testing]
 
       - name: Test dask-ms complete
-        run: poetry run py.test -s -vvv daskms/
+        run: py.test -s -vvv daskms/
 
       # - name: Debug with tmate on failure
       #   if: ${{ failure() }}
@@ -101,7 +96,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        python-version: ["3.10"]
+        python-version: ["3.13"]
 
     steps:
       - name: Create Cache Hash
@@ -113,35 +108,27 @@ jobs:
           echo "INSTALL_CACHE_HASH=$HASH" >> $GITHUB_ENV
 
       - name: Set up Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v7
         with:
           python-version: ${{ matrix.python-version }}
 
       - name: Cache Installations
         id: cache-installs
-        uses: actions/cache@v4
+        uses: actions/cache@v6
         with:
           path: ~/.local
           key: install-${{ env.INSTALL_CACHE_HASH }}-0
 
-      - name: Install Poetry
-        if: steps.cache-installs.outputs.cache-hit != 'true'
-        run: |
-          curl -sSL https://install.python-poetry.org | python3 - --version ${{ env.POETRY_VERSION }}
-
-      - name: Test poetry run
-        run: poetry --version
-
       - name: Checkout source
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
         with:
           fetch-depth: 1
 
       - name: Install dask-ms complete
-        run: poetry install --extras "testing complete"
+        run: pip install .[complete,testing]
 
       - name: Test dask-ms applications
-        run: poetry run py.test -s -vvv --applications daskms/
+        run: py.test -s -vvv --applications daskms/
 
       # - name: Debug with tmate on failure
       #   if: ${{ failure() }}
@@ -149,44 +136,30 @@ jobs:
 
 
   deploy:
+    environment:
+      name: pypi
+      url: https:/pypi.org/p/dask-ms
+    permissions:
+      id-token: write
     needs: [test, test_apps]
     runs-on: ubuntu-latest
-    # Run on a push to a tag or master
-    if: >
-      github.event_name == 'push' &&
-      (startsWith(github.event.ref, 'refs/tags') ||
-       github.event.ref == 'refs/heads/master')
 
     steps:
       - name: Set up Python 3.11
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v7
         with:
           python-version: 3.11
 
-      - name: Install Poetry
-        uses: abatilo/actions-poetry@v4
-        with:
-          poetry-version: ${{ env.POETRY_VERSION }}
-
       - name: Checkout source
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
         with:
           fetch-depth: 1
 
       - name: Build distributions
-        run: poetry build
-
-      - name: Publish distribution 📦 to Test PyPI
-        uses: pypa/gh-action-pypi-publish@master
-        with:
-          user: __token__
-          password: ${{ secrets.test_pypi_token }}
-          repository_url: https://test.pypi.org/legacy/
-        continue-on-error: true
+        run: |
+          pip install -U pip build
+          python -m build --sdist --wheel
 
       - name: Publish distribution 📦 to PyPI
-        uses: pypa/gh-action-pypi-publish@master
         if: github.event_name == 'push' && startsWith(github.event.ref, 'refs/tags')
-        with:
-          user: __token__
-          password: ${{ secrets.pypi_token }}
+        uses: pypa/gh-action-pypi-publish@release/v1
