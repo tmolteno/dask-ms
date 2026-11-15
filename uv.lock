@@ -772,6 +772,7 @@ complete = [
     { name = "zarr", version = "3.4.2", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.12'" },
 ]
 dev = [
+    { name = "invoke" },
     { name = "pre-commit" },
     { name = "ruff" },
     { name = "tbump" },
@@ -816,6 +817,7 @@ requires-dist = [
     { name = "donfig", specifier = ">=0.8.0" },
     { name = "fsspec", specifier = ">=2022.7.0" },
     { name = "furo", marker = "extra == 'docs'", specifier = ">=2025.9.25" },
+    { name = "invoke", marker = "extra == 'dev'", specifier = ">=2.2.0" },
     { name = "katdal", marker = "extra == 'complete'", specifier = ">=0.23" },
     { name = "katdal", marker = "extra == 'katdal'", specifier = ">=0.23" },
     { name = "moto", extras = ["server"], marker = "extra == 'testing'", specifier = ">=5.0.0" },
@@ -1394,6 +1396,15 @@ source = { registry = "https://pypi.org/simple" }
 sdist = { url = "https://files.pythonhosted.org/packages/01/e1/2069291243c926a2ff1cd706c7f3eeb9b62144bf60f77c9fb9ff2fb26bd3/iniconfig-2.3.1.tar.gz", hash = "sha256:67f4b9c50da0dedf52af349e7749a80a9057a5031199791b906c3bb3ae878960", size = 21209, upload-time = "2026-10-06T22:48:38.076Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/56/43/4ca9e49d27a1fcf6bece6f6aec0ea46bb9112489b93d4b688fb415457bdb/iniconfig-2.3.1-py3-none-any.whl", hash = "sha256:9121e2c1fdb355232495be3194c8dfe87ccc2d5dee45947b78e68f499790d7a7", size = 7552, upload-time = "2026-10-06T22:48:36.959Z" },
+]
+
+[[package]]
+name = "invoke"
+version = "3.0.3"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/33/f6/227c48c5fe47fa178ccf1fda8f047d16c97ba926567b661e9ce2045c600c/invoke-3.0.3.tar.gz", hash = "sha256:437b6a622223824380bfb4e64f612711a6b648c795f565efc8625af66fb57f0c", size = 343419, upload-time = "2026-04-07T15:17:48.307Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/5a/de/bbc12563bbf979618d17625a4e753ff7a078523e28d870d3626daa97261a/invoke-3.0.3-py3-none-any.whl", hash = "sha256:f11327165e5cbb89b2ad1d88d3292b5113332c43b8553b494da435d6ec6f5053", size = 160958, upload-time = "2026-04-07T15:17:46.875Z" },
 ]
 
 [[package]]

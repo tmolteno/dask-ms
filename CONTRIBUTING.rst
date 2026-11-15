@@ -119,19 +119,35 @@ Deploying
 
 A reminder for the maintainers on how to deploy.
 
-1. Update HISTORY.rst with the intended release number Z.Y.X and commit to git.
+A release must keep every version marker coherent:
 
-2. Bump the version number with bump2version. This creates a new git commit,
-   as well as an annotated tag Z.Y.X for the release.
-   If your current version is Z.Y.W and the new version is Z.Y.X call::
+* ``pyproject.toml`` ``version``
+* ``daskms/__init__.py`` ``__version__`` (also feeds ``docs/conf.py``)
+* ``tbump.toml`` ``current``
+* ``uv.lock`` (root ``dask-ms-2`` package version)
+* ``HISTORY.rst`` top section
+* the annotated git tag ``vZ.Y.Z`` -- the ``Publish dask-ms-2 package``
+  workflow only triggers on ``v*.*.*`` tags
 
-       $ python -m pip install bump2version
-       $ bump2version --current-version Z.Y.W --new-version Z.Y.X patch
+1. Add the intended release number to ``HISTORY.rst`` as ``Z.Y.Z
+   (unreleased)`` and commit it.
 
-3. Push the release commit and new tag up::
+2. Run the release task. It rewrites every version marker, dates the
+   ``HISTORY.rst`` section, commits ``Release Z.Y.Z: ...``, creates the
+   annotated tag ``vZ.Y.Z`` (message ``dask-ms-2 Z.Y.Z``) and pushes the
+   branch and the tag together with ``git push --atomic``::
 
-       $ git push --follow-tags
+       $ invoke release Z.Y.Z --reason "what changed"
 
-4. Pushing the ``v*.*.*`` tag triggers the ``Publish dask-ms-2 package``
+   Variants::
+
+       $ invoke release Z.Y.Z --reason "..." --dry-run   # print the plan only
+       $ invoke release Z.Y.Z --reason "..." --no-push   # local commit + tag only
+
+   The marker audit runs on demand::
+
+       $ invoke versions
+
+3. Pushing the ``v*.*.*`` tag triggers the ``Publish dask-ms-2 package``
    GitHub Actions workflow, which builds the wheel and source distribution
    and publishes them to PyPI with Trusted Publishing.
