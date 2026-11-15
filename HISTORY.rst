@@ -2,6 +2,20 @@
 History
 =======
 
+0.2.37 (unreleased)
+--------------------
+* Move experimental zarr support to zarr-python 3 (port of the completed
+  ratt-ru/dask-ms#387 migration from upstream 0.3.0). The ``zarr``,
+  ``katdal`` and ``complete`` extras now require ``zarr >=3.1.3`` and the
+  ``numcodecs <0.16`` cap is dropped: ``xarray >= 2026.9`` calls the zarr-v3
+  API (``open_group(zarr_format=...)``), so the old ``zarr <3`` pin broke
+  ``dask-ms-2[zarr]``/``[complete]``/``[katdal]`` against any current lock
+  (issue #1). Stores are still written in the zarr v2 format, so zarr 2
+  readers keep working; reading a string-column store written by an older
+  release now raises a clear "older dask-ms with zarr-python 2" error instead
+  of an opaque zarr failure. The two CI ``--deselect``s for the
+  xarray+zarr tests are removed.
+
 0.2.36 (2026-11-10)
 --------------------
 * Require casacure >= 3.8.41. casacure 3.8.40 wrote keyword records as
