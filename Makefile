@@ -1,4 +1,4 @@
-.PHONY: clean clean-test clean-pyc clean-build docs help
+.PHONY: clean clean-test clean-pyc clean-build dist docs help install lint release test
 .DEFAULT_GOAL := help
 
 define BROWSER_PYSCRIPT
@@ -24,10 +24,10 @@ for line in sys.stdin:
 endef
 export PRINT_HELP_PYSCRIPT
 
-BROWSER := python -c "$$BROWSER_PYSCRIPT"
+BROWSER := python3 -c "$$BROWSER_PYSCRIPT"
 
 help:
-	@python -c "$$PRINT_HELP_PYSCRIPT" < $(MAKEFILE_LIST)
+	@python3 -c "$$PRINT_HELP_PYSCRIPT" < $(MAKEFILE_LIST)
 
 clean: clean-build clean-pyc clean-test ## remove all build, test, coverage and Python artifacts
 
@@ -49,20 +49,11 @@ clean-test: ## remove test and coverage artifacts
 	rm -f .coverage
 	rm -fr htmlcov/
 
-lint: ## check style with flake8
-	flake8 daskms tests
+lint: ## run the same pre-commit hooks as CI
+	uv run pre-commit run --all-files
 
-test: ## run tests quickly with the default Python
-	py.test
-
-test-all: ## run tests on every Python version with tox
-	tox
-
-coverage: ## check code coverage quickly with the default Python
-	coverage run --source daskms -m pytest
-	coverage report -m
-	coverage html
-	$(BROWSER) htmlcov/index.html
+test: ## run the test suite (uv run pytest)
+	uv run pytest -q daskms/
 
 docs: ## generate Sphinx HTML documentation, including API docs
 	rm -f docs/daskms.rst
@@ -72,16 +63,12 @@ docs: ## generate Sphinx HTML documentation, including API docs
 	$(MAKE) -C docs html
 	$(BROWSER) docs/_build/html/index.html
 
-servedocs: docs ## compile the docs watching for changes
-	watchmedo shell-command -p '*.rst' -c '$(MAKE) -C docs html' -R -D .
+release: ## cut a release: make release VERSION=0.2.37 REASON="..." [DRY_RUN=1] [NO_PUSH=1]
+	@test -n "$(VERSION)" || { echo 'usage: make release VERSION=x.y.z REASON="what changed"'; exit 1; }
+	uv run invoke release $(VERSION) --reason "$(REASON)" $(if $(DRY_RUN),--dry-run) $(if $(NO_PUSH),--no-push)
 
-release: clean ## package and upload a release
-	twine upload dist/*
+dist: clean ## build source and wheel packages (uv build)
+	uv build
 
-dist: clean ## builds source and wheel package
-	python setup.py sdist
-	python setup.py bdist_wheel
-	ls -l dist
-
-install: clean ## install the package to the active Python's site-packages
-	python setup.py install
+install: ## sync the dev environment with all extras (uv sync)
+	uv sync --all-extras

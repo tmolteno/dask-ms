@@ -84,8 +84,16 @@ celerybeat-schedule
 
 # virtualenv
 .venv
+.venv-*/
 venv/
 ENV/
+
+# local tool caches -- hatchling sdists follow .gitignore, so these must
+# stay excluded or `uv build` packs them (absolute symlinks break the wheel)
+.uv-cache/
+.pre-commit-cache/
+.appcache/
+.relclone/
 
 # Spyder project settings
 .spyderproject
