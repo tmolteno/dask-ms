@@ -2,7 +2,7 @@
 History
 =======
 
-0.2.37 (unreleased)
+0.2.37 (2026-11-17)
 --------------------
 * Move experimental zarr support to zarr-python 3 (port of the completed
   ratt-ru/dask-ms#387 migration from upstream 0.3.0). The ``zarr``,

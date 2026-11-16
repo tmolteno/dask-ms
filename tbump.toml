@@ -2,7 +2,7 @@
 github_url = "https://github.com/tmolteno/dask-ms"
 
 [version]
-current = "0.2.36"
+current = "0.2.37"
 
 # Example of a semver regexp.
 # Make sure this matches current_version before
